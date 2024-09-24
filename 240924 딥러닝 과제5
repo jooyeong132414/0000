@@ -1,0 +1,44 @@
+import numpy as np
+
+class Activation_Softmax:
+    def forward(self, inputs):
+        exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
+        probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+        self.output = probabilities
+        return self.output
+
+
+class Loss_CategoricalCrossentropy:
+    def forward(self, predictions, targets):
+        predictions = np.clip(predictions, 1e-7, 1 - 1e-7)
+        if targets.ndim == 1:
+            correct_confidences = predictions[np.arange(len(predictions)), targets]
+        else:
+            correct_confidences = np.sum(predictions * targets, axis=1)
+
+        negative_log_likelihoods = -np.log(correct_confidences)
+
+        return np.mean(negative_log_likelihoods)
+
+
+if __name__ == "__main__":
+    softmax_outputs = np.array([
+        [1.0, 2.0, 3.0],
+        [1.0, 2.0, 3.0],
+        [1.0, 2.0, 3.0]
+    ])
+
+    softmax = Activation_Softmax()
+    softmax_output = softmax.forward(softmax_outputs)
+
+    print("Softmax Outputs:\n", softmax_output)
+
+    targets = np.array([0, 1, 2])
+
+
+    loss_function = Loss_CategoricalCrossentropy()
+
+
+    loss = loss_function.forward(softmax_output, targets)
+
+    print("\nCategorical Cross-Entropy Loss:", loss)
